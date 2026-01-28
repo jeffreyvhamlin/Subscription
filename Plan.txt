@@ -1,0 +1,35 @@
+Smart Subscription & Bill Guardian README
+Project Overview
+Smart Subscription & Bill Guardian automatically detects subscriptions, EMIs, and recurring bills from bank transactions, predicts cash flow issues, and provides plain-language alerts like "Your Spotify + Prime + Gym will cost ₹4,320 this month. Cancelling Gym saves ₹1,200. Risk of low balance on 26th." It builds on your Jeff Finance experience by adding periodicity detection, forecasting, and notifications.
+​
+
+Key Features
+Detect recurring patterns in transactions using periodicity mining.
+​
+
+NLP-based categorization of transaction descriptions (e.g., Logistic Regression or BERT).
+
+Balance forecasting and cash shortfall risk scoring with time series models.
+​
+
+User notifications for upcoming drains and savings opportunities.
+
+Secure upload/processing of CSV bank statements with explanations.
+
+Tech Stack
+Matches your preferences from Jeff Finance (FastAPI, PostgreSQL, scikit-learn) for full-stack ML/finance app.
+​
+
+Layer	Technology	Purpose
+Backend API	FastAPI	Endpoints for auth, uploads, analysis 
+​
+Database	PostgreSQL + SQLAlchemy	Store users/transactions
+Data Processing	Pandas, scikit-learn	Cleaning, pattern mining, Logistic Regression 
+ML/NLP	scikit-learn (LR baseline), optional HuggingFace Transformers	Categorization, forecasting 
+​
+Scheduling	APScheduler or Celery	Background jobs for detection 
+​
+Frontend/Dashboard	HTML/JS + D3.js	Visualizations, as in Jeff Finance
+Notifications	Twilio/SendGrid or WebSockets	Alerts 
+​
+Security	Pydantic validation, AES-256 encryption, JWT	Data handling best practices 

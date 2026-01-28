@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Subscription Guardian</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <h1>💰 Subscription Guardian</h1>
+            <div class="header-actions">
+                <div class="notification-bell" id="notificationBell">
+                    🔔
+                    <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-label">📤</div>
+            <div class="upload-text">
+                <h3>Upload Bank Statement</h3>
+                <p>Drag and drop your CSV file here or click to browse</p>
+            </div>
+            <input type="file" id="fileInput" accept=".csv">
+            <button class="btn-upload" id="uploadBtn">Choose File</button>
+            <div id="uploadStatus" style="margin-top: 1rem;"></div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card fade-in">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-value" id="totalTransactions">-</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">🔁</div>
+                <div class="stat-label">Active Subscriptions</div>
+                <div class="stat-value" id="totalSubscriptions">-</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">💸</div>
+                <div class="stat-label">Monthly Subscription Cost</div>
+                <div class="stat-value" id="monthlySubCost">₹-</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">📈</div>
+                <div class="stat-label">Spent This Month</div>
+                <div class="stat-value" id="totalSpent">₹-</div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Balance Forecast Chart -->
+            <div class="card fade-in">
+                <h2>📊 Balance Forecast (30 Days)</h2>
+                <div id="balanceChart"></div>
+            </div>
+
+            <!-- Subscriptions List -->
+            <div class="card fade-in">
+                <h2>🔁 Your Subscriptions</h2>
+                <div class="subscriptions-list" id="subscriptionsList">
+                    <p class="loading">Loading subscriptions...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <div class="notifications-header">
+            <h2>🔔 Notifications</h2>
+            <button class="close-notifications" id="closeNotifications">✕</button>
+        </div>
+        <div id="notificationsList">
+            <p class="loading">Loading notifications...</p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
