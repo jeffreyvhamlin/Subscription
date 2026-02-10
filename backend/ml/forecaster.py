@@ -36,28 +36,36 @@ def forecast_balance(user_id: int, db: Session, days_ahead: int = 30):
     daily_df = df.groupby('date')['amount'].sum().reset_index()
     daily_df = daily_df.sort_values('date')
     
-    # Calculate cumulative balance (assuming starting balance is the first cumulative sum)
+    # Calculate cumulative balance
     daily_df['balance'] = daily_df['amount'].cumsum()
     
-    # Get current balance
-    current_balance = daily_df['balance'].iloc[-1] if len(daily_df) > 0 else 0
-    last_date = daily_df['date'].iloc[-1] if len(daily_df) > 0 else datetime.now()
+    # --- Part 1: Historical Timeline ---
+    timeline_dates = []
+    timeline_balances = []
     
+    for _, row in daily_df.iterrows():
+        timeline_dates.append(row['date'].strftime('%Y-%m-%d'))
+        timeline_balances.append(round(row['balance'], 2))
+    
+    # Get current balance and last date
+    current_balance = timeline_balances[-1] if timeline_balances else 0
+    now = datetime.now()
+    
+    # --- Part 2: Future Forecast ---
     # Get upcoming subscriptions
     subscriptions = db.query(Subscription).filter(
         Subscription.user_id == user_id,
         Subscription.status == "active"
     ).all()
     
-    # Create forecast
     forecast_dates = []
     forecast_balances = []
     
-    current_date = datetime.now()
     balance = current_balance
     
-    for i in range(days_ahead):
-        forecast_date = current_date + timedelta(days=i)
+    # Predict for next 30 days starting from tomorrow
+    for i in range(1, days_ahead + 1):
+        forecast_date = now + timedelta(days=i)
         forecast_dates.append(forecast_date.strftime('%Y-%m-%d'))
         
         # Check for subscriptions due on this date
@@ -67,16 +75,20 @@ def forecast_balance(user_id: int, db: Session, days_ahead: int = 30):
         
         forecast_balances.append(round(balance, 2))
     
-    # Identify low balance dates (balance < 1000 or negative)
+    # Combine historical and forecast
+    combined_dates = timeline_dates + forecast_dates
+    combined_balances = timeline_balances + forecast_balances
+    
+    # Identify low balance dates (balance < 1000)
     low_balance_threshold = 1000
     low_balance_dates = [
-        date for date, bal in zip(forecast_dates, forecast_balances) 
+        date for date, bal in zip(combined_dates, combined_balances) 
         if bal < low_balance_threshold
     ]
     
     return {
-        "dates": forecast_dates,
-        "predicted_balance": forecast_balances,
+        "dates": combined_dates,
+        "predicted_balance": combined_balances,
         "low_balance_dates": low_balance_dates
     }
 

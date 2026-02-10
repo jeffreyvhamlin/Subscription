@@ -453,6 +453,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -461,4 +462,79 @@ body {
 
 .fade-in {
     animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Refined Content Grid */
+.content-grid-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* 2-Column Subscription Grid - Hard Forced */
+.subscriptions-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)) !important;
+    gap: 1.5rem !important;
+}
+
+@media (min-width: 1200px) {
+    .subscriptions-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .subscriptions-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.subscription-item {
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+/* Upload Buttons Container */
+.upload-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+/* Premium Red Button - Bulletproof Mirror of btn-upload */
+.btn-clear-data-red {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn-clear-data-red:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+    background: linear-gradient(135deg, #f87171, #ef4444);
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    z-index: 100;
 }

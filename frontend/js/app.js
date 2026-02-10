@@ -24,10 +24,17 @@ async function loadDashboardData() {
     try {
         // Load stats
         const stats = await api.getStats();
-        document.getElementById('totalTransactions').textContent = stats.total_transactions.toLocaleString();
-        document.getElementById('totalSubscriptions').textContent = stats.total_subscriptions;
-        document.getElementById('monthlySubCost').textContent = `₹${stats.monthly_subscription_cost.toLocaleString('en-IN')}`;
-        document.getElementById('totalSpent').textContent = `₹${stats.total_spent_this_month.toLocaleString('en-IN')}`;
+        document.getElementById('totalTransactions').textContent = (stats.total_transactions || 0).toLocaleString();
+        document.getElementById('totalSubscriptions').textContent = stats.total_subscriptions || 0;
+        document.getElementById('monthlySubCost').textContent = `₹${Math.round(stats.monthly_subscription_cost || 0).toLocaleString('en-IN')}`;
+        document.getElementById('avgSpentPerMonth').textContent = `₹${Math.round(stats.avg_spent_per_month || 0).toLocaleString('en-IN')}`;
+        document.getElementById('totalSpentOverall').textContent = `₹${Math.round(stats.total_spent_overall || 0).toLocaleString('en-IN')}`;
+
+        // Update Total Amount Spent stat specifically if needed
+        const totalSpentOverallElem = document.getElementById('totalSpentOverall');
+        if (totalSpentOverallElem.textContent === '₹NaN' || totalSpentOverallElem.textContent === '₹-') {
+            totalSpentOverallElem.textContent = '₹0';
+        }
 
         // Load subscriptions
         await loadSubscriptions();
@@ -49,18 +56,21 @@ async function loadSubscriptions() {
         const subscriptions = await api.getSubscriptions();
         const container = document.getElementById('subscriptionsList');
 
+        container.classList.remove('loading');
+
         if (subscriptions.length === 0) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">No subscriptions detected yet. Upload transactions to get started!</p>';
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">No subscriptions detected yet. Upload transactions to get started!</p>';
             return;
         }
 
+        container.className = 'subscriptions-grid';
         container.innerHTML = subscriptions.map(sub => `
             <div class="subscription-item">
                 <div class="subscription-info">
                     <h3>${sub.name}</h3>
                     <p>${sub.frequency} • ${(sub.confidence_score * 100).toFixed(0)}% confidence</p>
                 </div>
-                <div class="subscription-amount">₹${sub.amount.toLocaleString('en-IN')}</div>
+                <div class="subscription-amount">₹${Math.round(sub.amount).toLocaleString('en-IN')}</div>
             </div>
         `).join('');
     } catch (error) {
@@ -143,6 +153,13 @@ function setupEventListeners() {
         document.getElementById('notificationsPanel').classList.remove('open');
     });
 
+    // Clear data
+    document.getElementById('clearDataBtn').addEventListener('click', async () => {
+        if (confirm('Are you sure you want to clear all transaction data? This action cannot be undone.')) {
+            await handleClearData();
+        }
+    });
+
     // File upload
     const uploadSection = document.getElementById('uploadSection');
     const fileInput = document.getElementById('fileInput');
@@ -197,6 +214,51 @@ async function handleFileUpload(file) {
         }, 1000);
     } catch (error) {
         showUploadStatus(`❌ ${error.message}`, 'error');
+    }
+}
+
+// Handle clear data
+async function handleClearData() {
+    try {
+        console.log('Initiating hard clear...');
+
+        // Immediate UI Wipe
+        document.getElementById('totalTransactions').textContent = '0';
+        document.getElementById('totalSubscriptions').textContent = '0';
+        document.getElementById('monthlySubCost').textContent = '₹0';
+        document.getElementById('avgSpentPerMonth').textContent = '₹0';
+        document.getElementById('totalSpentOverall').textContent = '₹0';
+
+        const subList = document.getElementById('subscriptionsList');
+        if (subList) subList.innerHTML = '<p class="loading">Clearing data...</p>';
+
+        if (typeof d3 !== 'undefined' && document.getElementById('balanceChart')) {
+            d3.select('#balanceChart').selectAll('*').remove();
+        }
+
+        // Backend Call
+        await api.deleteTransactions();
+
+        // Reset file input
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) fileInput.value = '';
+
+        showUploadStatus('✅ All data wiped successfully!', 'success');
+
+        // Final UI State
+        if (subList) {
+            subList.innerHTML = '<p style="color: #94a3b8; text-align: center; width: 100%;">Data cleared. Ready for new upload.</p>';
+            subList.className = 'subscriptions-grid';
+        }
+
+        // Reload to be absolutely sure
+        setTimeout(async () => {
+            await loadDashboardData();
+        }, 300);
+
+    } catch (error) {
+        console.error('Hard clear error:', error);
+        showUploadStatus(`❌ Error: ${error.message}`, 'error');
     }
 }
 

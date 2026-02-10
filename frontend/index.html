@@ -27,15 +27,20 @@
         </div>
 
         <!-- Upload Section -->
-        <div class="upload-section" id="uploadSection">
-            <div class="upload-label">📤</div>
-            <div class="upload-text">
-                <h3>Upload Bank Statement</h3>
-                <p>Drag and drop your CSV file here or click to browse</p>
+        <div class="card fade-in" style="margin-bottom: 2rem;">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-label">📤</div>
+                <div class="upload-text">
+                    <h3>Upload Bank Statement</h3>
+                    <p>Drag and drop your CSV file here or click to browse</p>
+                </div>
+                <input type="file" id="fileInput" accept=".csv">
+                <div class="upload-buttons">
+                    <button class="btn-upload" id="uploadBtn">Choose File</button>
+                    <button id="clearDataBtn" class="btn-clear-data-red">🗑️ Clear All Data</button>
+                </div>
             </div>
-            <input type="file" id="fileInput" accept=".csv">
-            <button class="btn-upload" id="uploadBtn">Choose File</button>
-            <div id="uploadStatus" style="margin-top: 1rem;"></div>
+            <div id="uploadStatus" style="margin-top: 1rem; text-align: center;"></div>
         </div>
 
         <!-- Stats Grid -->
@@ -57,25 +62,30 @@
             </div>
             <div class="stat-card fade-in">
                 <div class="stat-icon">📈</div>
-                <div class="stat-label">Spent This Month</div>
-                <div class="stat-value" id="totalSpent">₹-</div>
+                <div class="stat-label">Avg Amount per Month</div>
+                <div class="stat-value" id="avgSpentPerMonth">₹-</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Total Amount Spent</div>
+                <div class="stat-value" id="totalSpentOverall">₹-</div>
             </div>
         </div>
 
         <!-- Content Grid -->
-        <div class="content-grid">
-            <!-- Balance Forecast Chart -->
-            <div class="card fade-in">
-                <h2>📊 Balance Forecast (30 Days)</h2>
-                <div id="balanceChart"></div>
-            </div>
-
+        <div class="content-grid-vertical">
             <!-- Subscriptions List -->
             <div class="card fade-in">
                 <h2>🔁 Your Subscriptions</h2>
-                <div class="subscriptions-list" id="subscriptionsList">
+                <div class="subscriptions-grid" id="subscriptionsList">
                     <p class="loading">Loading subscriptions...</p>
                 </div>
+            </div>
+
+            <!-- Balance Forecast Chart -->
+            <div class="card fade-in">
+                <h2>📈 Balance Timeline & Forecast</h2>
+                <div id="balanceChart"></div>
             </div>
         </div>
     </div>

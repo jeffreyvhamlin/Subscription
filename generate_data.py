@@ -3,27 +3,60 @@ import numpy as np
 from datetime import datetime, timedelta
 import random
 
-def generate_transactions(num_transactions=500, years=1):
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=365 * years)
+def generate_transactions(start_date=None, end_date=None, monthly_salary=50000.0, num_random_transactions=500):
+    """
+    Generate synthetic bank transactions between start_date and end_date.
     
+    Args:
+        start_date (str or datetime): Start of transaction history (e.g., '2023-01-01')
+        end_date (str or datetime): End of transaction history (defaults to now)
+        monthly_salary (float): Recurring salary credit amount
+        num_random_transactions (int): Number of irregular/random transactions to sprinkle in
+    """
+    # Handle dates
+    if end_date is None:
+        end_date = datetime.now()
+    elif isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        
+    if start_date is None:
+        start_date = end_date - timedelta(days=365)
+    elif isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+    
+    total_days = (end_date - start_date).days
+    if total_days <= 0:
+        raise ValueError("Start date must be before end date")
+
     data = []
     
     # --- 1. Monthly Salary (Credit) ---
-    current_date = start_date.replace(day=1) + timedelta(days=30)
+    # First salary pay day after start_date
+    current_date = start_date.replace(day=min(random.randint(1, 5), 28))
+    if current_date < start_date:
+        current_date += timedelta(days=30)
+        
     while current_date <= end_date:
         data.append({
             'Date': current_date.strftime('%Y-%m-%d'),
             'Description': 'CORPORATE SALARY CREDIT',
             'Debit': '',
-            'Credit': 50000.00
+            'Credit': float(monthly_salary)
         })
-        current_date += timedelta(days=30)
-        # Randomize day a bit
-        current_date = current_date.replace(day=min(random.randint(28, 31), 30))
+        # Move to next month
+        next_month = current_date.month + 1
+        next_year = current_date.year
+        if next_month > 12:
+            next_month = 1
+            next_year += 1
+        
+        current_date = current_date.replace(year=next_year, month=next_month, day=min(random.randint(1, 5), 28))
 
     # --- 2. Monthly Rent (Debit) ---
-    current_date = start_date.replace(day=5)
+    current_date = start_date.replace(day=min(random.randint(5, 10), 28))
+    if current_date < start_date:
+        current_date += timedelta(days=30)
+
     while current_date <= end_date:
         data.append({
             'Date': current_date.strftime('%Y-%m-%d'),
@@ -31,7 +64,13 @@ def generate_transactions(num_transactions=500, years=1):
             'Debit': 15000.00,
             'Credit': ''
         })
-        current_date += timedelta(days=30)
+        # Move to next month
+        next_month = current_date.month + 1
+        next_year = current_date.year
+        if next_month > 12:
+            next_month = 1
+            next_year += 1
+        current_date = current_date.replace(year=next_year, month=next_month, day=min(random.randint(5, 10), 28))
 
     # --- 3. Subscriptions (Monthly) ---
     subs = [
@@ -43,11 +82,16 @@ def generate_transactions(num_transactions=500, years=1):
     ]
     
     for name, amount in subs:
-        current_date = start_date + timedelta(days=random.randint(1, 28))
+        # Each sub has its own fixed day of the month
+        sub_day = random.randint(1, 28)
+        current_date = start_date.replace(day=sub_day)
+        if current_date < start_date:
+            current_date += timedelta(days=30)
+
         while current_date <= end_date:
             # Add slight variations to description
             desc = name
-            if random.random() > 0.7:
+            if random.random() > 0.8:
                 desc = name + " REF " + str(random.randint(1000, 9999))
                 
             data.append({
@@ -56,7 +100,13 @@ def generate_transactions(num_transactions=500, years=1):
                 'Debit': amount,
                 'Credit': ''
             })
-            current_date += timedelta(days=30)
+            # Move to next month
+            next_month = current_date.month + 1
+            next_year = current_date.year
+            if next_month > 12:
+                next_month = 1
+                next_year += 1
+            current_date = current_date.replace(year=next_year, month=next_month, day=sub_day)
 
     # --- 4. Weekly Grocery (Weekly) ---
     current_date = start_date
@@ -64,25 +114,24 @@ def generate_transactions(num_transactions=500, years=1):
         data.append({
             'Date': current_date.strftime('%Y-%m-%d'),
             'Description': 'SUPERMARKET GROCERIES',
-            'Debit': random.uniform(800, 1500),
+            'Debit': round(random.uniform(800, 2500), 2),
             'Credit': ''
         })
         current_date += timedelta(days=7)
 
-    # --- 5. Random Transactions (Daily/Irregular) ---
-    remaining = num_transactions - len(data)
+    # --- 5. Random Transactions (Irregular) ---
     random_descs = ['UBER RIDE', 'STARBUCKS COFFEE', 'RESTAURANT DINNER', 'ZOMATO ORDER', 
                     'AMAZON SHOPPING', 'PHARMACY', 'MOVIE TICKETS', 'PETROL PUMP', 
-                    'LAUNDRY SERVICE', 'BOOKSTORE']
+                    'LAUNDRY SERVICE', 'BOOKSTORE', 'CLOTHING STORE', 'LOCAL TEA STALL']
     
-    for _ in range(remaining):
-        random_date = start_date + timedelta(days=random.randint(0, 365))
-        if random_date > end_date: continue
+    for _ in range(num_random_transactions):
+        random_day_offset = random.randint(0, total_days)
+        random_date = start_date + timedelta(days=random_day_offset)
         
         data.append({
             'Date': random_date.strftime('%Y-%m-%d'),
             'Description': random.choice(random_descs),
-            'Debit': round(random.uniform(50, 2000), 2),
+            'Debit': round(random.uniform(20, 3000), 2),
             'Credit': ''
         })
 
@@ -101,6 +150,17 @@ def generate_transactions(num_transactions=500, years=1):
     return df
 
 if __name__ == "__main__":
-    df = generate_transactions(500)
-    df.to_csv('data/transactions_1year.csv', index=False)
-    print(f"Generated {len(df)} transactions in data/transactions_1year.csv")
+    # Example Usage:
+    # 2 years of data, 75k salary
+    start = '2024-01-01'
+    end = '2024-03-01'
+    salary = 75000.0
+    
+    df = generate_transactions(start_date=start, end_date=end, monthly_salary=salary, num_random_transactions=800)
+    
+    output_path = 'data/data1.csv'
+    df.to_csv(output_path, index=False)
+    print(f"✅ Success! Generated {len(df)} transactions.")
+    print(f"📅 Range: {start} to {end}")
+    print(f"💰 Salary: ₹{salary}")
+    print(f"📂 Saved to: {output_path}")

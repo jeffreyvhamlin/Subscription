@@ -79,6 +79,8 @@ class TransactionStats(BaseModel):
     total_subscriptions: int
     monthly_subscription_cost: float
     total_spent_this_month: float
+    avg_spent_per_month: float
+    total_spent_overall: float
     
 # Forecast Schemas
 class BalanceForecast(BaseModel):
